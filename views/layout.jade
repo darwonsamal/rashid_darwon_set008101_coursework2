@@ -19,6 +19,10 @@ html(lang='en')
             if user
              li(class=(title == 'Home' ? 'active' : ''))
                a(href='/') Home 
+             li(class=(title == 'Add Post' ? 'active' : ''))
+               a(href='/posts/add') Add Post
+             li(class=(title == 'Add Category' ? 'active' : ''))
+               a(href='categories/add') Add Category
             if !user
              li(class=(title == 'Register' ? 'active' : ''))
                a(href='/users/register') Register

@@ -16,10 +16,15 @@ var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var db = mongoose.connection;
 
+var dbMonk = require('monk')('localhost/nodeauth');
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var posts = require('./routes/posts');
 
 var app = express();
+
+app.locals.moment = require('moment');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -74,8 +79,15 @@ app.get('*', function(req, res, next){
   next();
 });
 
+// Make our db accessible to our router
+app.use(function(req,res,next){
+    req.db = dbMonk;
+    next();
+});
+
 app.use('/', routes);
 app.use('/users', users);
+app.use('/posts', posts);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
