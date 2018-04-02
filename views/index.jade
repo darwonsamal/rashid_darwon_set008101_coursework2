@@ -1,15 +1,21 @@
 extends layout
 
 block content
-  h1 Home 
-  p This is where you view articles 
-  
+
+  if !posts 
+   h3 There are no posts yet!
+   
   if posts
    each post, i in posts
     .post
      h1
       a(href='/posts/show/#{post._id}')
        =post.title
-     p.meta Posted in #{post.category} by #{post.author} on #{moment(post.date).format("MM-DD-YYYY")}
-     =post.body
+     p.meta Posted in 
+      a(href='/categories/show/#{post.category}') #{post.category} 
+      by #{post.author} 
+      on #{moment(post.date).format("MM-DD-YYYY")}
+     img(src='/images/#{post.mainimage}')
+     !=truncateText(post.body,400)
      a.more(href='/posts/show/#{post._id}') Read More
+     

@@ -4,12 +4,20 @@ var multer = require('multer');
 var upload = multer({dest: './uploads'});
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var mongo = require('mongodb');
+var db = require('monk')('localhost/nodeauth');
 
 var User = require('../models/user');
+
+var loggedInUser;
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
+});
+
+router.get('/myprofile', function(req, res, next) {
+  res.render('myprofile');
 });
 
 router.get('/register', function(req, res, next) {
@@ -20,11 +28,19 @@ router.get('/login', function(req, res, next) {
   res.render('login', {title:'Login'});
 });
 
-router.post('/login',
-  passport.authenticate('local',{failureRedirect:'/users/login', failureFlash: 'Invalid username or password'}),
+router.post('/login', passport.authenticate('local',{failureRedirect:'/users/login', failureFlash: 'Invalid username or password'}),
   function(req, res) {
-   req.flash('success', 'You are now logged in');
-   res.redirect('/');
+  var posts = db.get('posts');
+  req.app.locals.username = req.body.username;
+  req.app.locals.loggedInUser = loggedInUser;
+
+//  posts.find({username: req.body.username}, {}, function(err, post) {
+//    res.render('index', {
+//      'post' : post
+//    });
+//  });
+  req.flash('success', 'You are now logged in');
+  res.redirect('/');
 });
 
 passport.serializeUser(function(user, done) {
@@ -47,6 +63,8 @@ passport.use(new LocalStrategy(function(username, password, done){
     User.comparePassword(password, user.password, function(err, isMatch){
       if(err) return done(err);
       if(isMatch){
+
+        loggedInUser = user;
         return done(null, user);
       } else {
         return done(null, false, {message:'Invalid Password'});
@@ -108,6 +126,8 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
 
 router.get('/logout', function(req, res){
   req.logout();
+  req.app.locals.username = "";
+  console.log(req.app.locals.username);
   req.flash('success', 'You are now logged out');
   res.redirect('/users/login');
 });

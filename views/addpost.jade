@@ -22,8 +22,8 @@ block content
 			label Main Image:
 			input.form-control(name='mainimage', type='file')
 		.form-group
-			label Author:
-			select.form-control(name='author')
-				option(value='Darwon Rashid') Darwon Rashid
-				option(value='Average Joe') Average Joe
 		input.btn.btn-default(name='submit',type='submit',value='Save')
+		
+		script(src='/ckeditor/ckeditor.js')
+		script
+			| CKEDITOR.replace('body');

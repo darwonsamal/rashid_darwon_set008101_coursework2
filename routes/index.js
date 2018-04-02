@@ -7,7 +7,8 @@ var db = require('monk')('localhost/nodeauth');
 /* GET home page. */
 router.get('/', ensureAuthenticated, function(req, res, next) {
   var db = req.db;
-	var posts = db.get('posts');
+  var posts = db.get('posts');
+
 	posts.find({}, {}, function(err, posts){
   res.render('index', { posts: posts });
   });

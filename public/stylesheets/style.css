@@ -1,21 +1,71 @@
-ul.success li{
-	padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    color: #3c763d;
-    background-color: #dff0d8;
-    border-color: #d6e9c6;
-    list-style: none;
+
+
+h1,h2,h3,p{
+	padding:5px 0;
+	margin-bottom:0;
 }
 
-ul.error li{
+p{
+	margin:0;
+}
+
+.post img{
+	width:100%;
+}
+
+
+.meta{
+	padding:7px;
+	border:1px solid #ccc;
+	background:#ccc;
+	margin-bottom:10px;
+}
+
+a.more{
+	display:block;
+	width:80px;
+	background:#404137;
+	color:#fff;
+	padding:10px;
+	margin-top:30px;
+	text-decoration: none;
+}
+
+.post{
+	border-bottom:1px solid #ccc;
+	padding-bottom:20px;
+}
+
+.post h1 a{
+	color:#666;
+	text-decoration: none;
+}
+
+input, select, textarea{
+	margin-bottom:15px;
+}
+
+label{
+	display:inline-block;
+	width:180px;
+}
+
+
+
+select{
+	height:28px;
+}
+
+
+
+ul.success li{
 	padding: 15px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    border-radius: 4px;
- 	color: #a94442;
-    background-color: #f2dede;
-    border-color: #ebccd1;
-    list-style: none;
+	margin-top:10px;
+  	margin-bottom: 20px;
+  	border: 1px solid transparent;
+  	border-radius: 4px;
+  	color: #3c763d;
+  	background-color: #dff0d8;
+  	border-color: #d6e9c6;
+  	list-style:none;
 }

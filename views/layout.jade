@@ -19,10 +19,14 @@ html(lang='en')
             if user
              li(class=(title == 'Home' ? 'active' : ''))
                a(href='/') Home 
+             li(class=(title == 'My Posts' ? 'active' : ''))
+               a(href = '/posts/myposts') My Posts
              li(class=(title == 'Add Post' ? 'active' : ''))
                a(href='/posts/add') Add Post
              li(class=(title == 'Add Category' ? 'active' : ''))
-               a(href='categories/add') Add Category
+               a(href='/categories/add') Add Category
+             li(class=(title == 'My Profile' ? 'active' : ''))
+               a(href= '/users/myprofile') My Profile
             if !user
              li(class=(title == 'Register' ? 'active' : ''))
                a(href='/users/register') Register
@@ -35,6 +39,8 @@ html(lang='en')
     .container
      != messages()
      block content
+     footer
+      p Blog Machine &copy; 2018
      
     script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js')
     script(src='javascripts/bootstrap.js')
