@@ -1,8 +1,22 @@
 extends layout
 
 block content
- h2.page-header My Profile
- p Please register using the form below
- if errors
-  each error, i in errors
-   div.alert.alert-danger #{error.msg}
+  h2.page-header My Profile
+  if users
+   .gridContainer
+    .img
+      img(src='/images/#{users.profileimage}')
+    .user
+      h3 Your Name: #{users.name}
+      h3 Your Email: #{users.email}
+      h3 Your Username: #{users.username}
+      br
+      a(href='/users/edituser/#{users._id}')
+       input.btn.btn-primary(type='button', name= 'editprofile', value= 'Edit Profile')
+      a(href='/users/updatepassword/#{users._id}')
+       input.btn.btn-primary(type='button', name= 'editpassword', value= 'Change Password')
+      a(href='/users/deleteuser/#{users._id}')
+       input.btn.btn-primary(type='button', name= 'deleteprofile', value= 'Delete Profile')
+       
+    
+    

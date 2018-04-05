@@ -1,9 +1,8 @@
 extends layout
 
 block content
-
   if !posts 
-   
+   h3 You have no posts yet!
   if posts
    each post, i in posts
     .post
@@ -12,9 +11,15 @@ block content
        =post.title
      p.meta Posted in 
       a(href='/categories/show/#{post.category}') #{post.category} 
-      by #{post.author} 
       on #{moment(post.date).format("MM-DD-YYYY")}
      img(src='/images/#{post.mainimage}')
      !=truncateText(post.body,400)
      a.more(href='/posts/show/#{post._id}') Read More
+     br
+     a(href='/posts/editpost/#{post._id}')
+      input.btn.btn-primary(type='button', name= 'editpost', value= 'Edit Post')
+     a(href='/posts/deletepost/#{post._id}')
+      input.btn.btn-primary(type='button', name= 'deletepost', value= 'Delete Post') 
+    
+
      

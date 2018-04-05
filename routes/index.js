@@ -10,7 +10,7 @@ router.get('/', ensureAuthenticated, function(req, res, next) {
   var posts = db.get('posts');
 
 	posts.find({}, {}, function(err, posts){
-  res.render('index', { posts: posts });
+  res.render('index', { posts: posts, title: "Home"});
   });
 });
 

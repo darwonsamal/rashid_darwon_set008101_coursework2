@@ -6,10 +6,10 @@ var db = require('monk')('localhost/nodeauth');
 router.get('/show/:category', function(req, res, next) {
 	var posts = db.get('posts');
 
-	posts.find({category: req.params.category},{},function(err, posts){
+	posts.find({category: req.params.category},{},function(err, post){
 		res.render('index',{
-  			'title': req.params.category,
-  			'posts': posts
+  			title : req.params.category,
+  			post: post
   		});
 	});
 });

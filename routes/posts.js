@@ -6,41 +6,106 @@ var mongo = require('mongodb');
 var db = require('monk')('localhost/nodeauth');
 
 
-router.get('/show/:id', function(req, res, next) {
+router.get('/show/:id', function(req, res, next)
+{
 	var posts = db.get('posts');
 
-	posts.find({_id: req.params.id}, {},function(err, post){
-		console.log(post);
-		res.render('show',{
-  			'post': post
-  		});
+	posts.find({'_id': db.id(req.params.id)}, {}, function(err, posts)
+	{
+		if(err)
+		{
+			throw err;
+		}
+
+		req.app.locals.postid = req.params.id;
+
+		res.render('show',
+		{
+  			'posts': posts
+  	});
+
 	});
 });
 
-router.get('/add', function(req, res, next) {
+router.get('/add', function(req, res, next)
+{
 	var categories = db.get('categories');
 
+	categories.find({},{},function(err, categories)
+	{
+		if(err)
+		{
+			throw err;
+		}
 
-	categories.find({},{},function(err, categories){
-		res.render('addpost',{
-  			'title': 'Add Post',
-  			'categories': categories
-  		});
+		res.render('addpost',
+		{
+  			title: 'Add Post',
+  			categories: categories
+  	});
 	});
 });
 
-router.get('/myposts', function(req, res, next) {
-	var categories = db.get('categories');
+router.get('/myposts', function(req, res, next)
+{
 
 	var posts = db.get('posts');
 
-	posts.find({username: req.app.locals.username}, {}, function(err, posts) {
-		res.render('myposts', { posts: posts });
+	posts.find({username: req.app.locals.username}, {}, function(err, posts)
+	{
+		if(err)
+		{
+			throw err;
+		}
+
+		res.render('myposts', { posts: posts, title: "My Posts" });
 
 	});
 });
 
-router.post('/add', upload.single('mainimage'), function(req, res, next) {
+router.get('/editpost/:id', function(req, res, next)
+{
+
+	var posts = db.get('posts');
+	var categories = db.get('categories');
+
+	categories.find({},{},function(err, categories)
+	{
+		if(err)
+		{
+			throw err;
+		}
+
+		posts.find({'_id': db.id(req.params.id)},{}, function(err, posts)
+		{
+			if(err)
+			{
+				throw err;
+			}
+			req.app.locals.mainimage = posts[0].mainimage;
+			req.app.locals.postid = req.params.id;
+			res.render('editpost',
+			{
+	  			'posts': posts,
+					'categories': categories
+	  	});
+		});
+	});
+
+});
+
+router.get('/deletepost/:id', function(req, res, next)
+{
+	var posts = db.get('posts');
+	posts.remove({_id: db.id(req.params.id)});
+	res.location('/posts/myposts');
+	res.redirect('/posts/myposts');
+
+
+});
+
+router.post('/add', upload.single('mainimage'), function(req, res, next)
+{
   // Get Form Values
   var title = req.body.title;
   var category= req.body.category;
@@ -49,9 +114,12 @@ router.post('/add', upload.single('mainimage'), function(req, res, next) {
   var date = new Date();
 
   // Check Image Upload
-  if(req.file){
+  if(req.file)
+	{
   	var mainimage = req.file.filename
-  } else {
+  }
+	else
+	{
   	var mainimage = 'noimage.jpg';
   }
 
@@ -62,13 +130,30 @@ router.post('/add', upload.single('mainimage'), function(req, res, next) {
 	// Check Errors
 	var errors = req.validationErrors();
 
-	if(errors){
-		res.render('addpost',{
-			"errors": errors
+	if(errors)
+	{
+
+		var categories = db.get('categories');
+
+		categories.find({},{}, function(err, categories)
+		{
+
+			res.render('addpost',
+			{
+				errors: errors,
+				categories: categories,
+				user: req.app.locals.loggedInUser
+			});
+
 		});
-	} else {
+
+	}
+
+	else
+	{
 		var posts = db.get('posts');
-		posts.insert({
+		posts.insert(
+	  {
 
 			"title": title,
 			"body": body,
@@ -78,45 +163,67 @@ router.post('/add', upload.single('mainimage'), function(req, res, next) {
 			"username" : username
 
 
-		}, function(err, post){
-			if(err){
-				res.send(err);
-			} else {
-				req.flash('success','Post Added');
-				res.location('/');
-				res.redirect('/');
-			}
-		});
+		}, function(err, post)
+		   {
+			   	if(err)
+				 	{
+					 	res.send(err);
+					}
+					else
+					{
+						req.flash('success','Post Added');
+						res.location('/');
+						res.redirect('/');
+					}
+			 });
 	}
 });
 
 router.post('/addcomment', function(req, res, next) {
-  // Get Form Values
-  var name = req.body.name;
-  var email = req.body.email;
-  var body = req.body.body;
-  var postid = req.body.postid;
-  var commentdate = new Date();
+	// Get Form Values
+	var title = req.body.title;
+	var body = req.body.body;
+	var username = req.app.locals.username;
 
-  	// Form Validation
-	req.checkBody('name','Name field is required').notEmpty();
-	req.checkBody('email','Email field is required but never displayed').notEmpty();
-	req.checkBody('email','Email is not formatted properly').isEmail();
+		// Form Validation
+	req.checkBody('title','Title field is required').notEmpty();
 	req.checkBody('body', 'Body field is required').notEmpty();
 
 	// Check Errors
 	var errors = req.validationErrors();
 
-	if(errors){
+	if(errors)
+	{
+
 		var posts = db.get('posts');
-		posts.find({_id: postid},{}, function(err, post){
-			res.render('show',{
-				"errors": errors,
-				"post": post
+		var categories = db.get('categories');
+		categories.find({},{},function(err, categories)
+		{
+			if(err)
+			{
+				throw err;
+			}
+
+			posts.find({'_id': db.id(req.app.locals.postid)}, {},function(err, posts)
+			{
+				if(err)
+				{
+					throw err;
+				}
+
+				res.render('editpost',
+				{
+						'posts': posts,
+						'categories': categories,
+						'user': req.app.locals.loggedInUser
+				});
 			});
 		});
-	} else {
-		var comment = {
+	}
+	else
+	{
+		var comment =
+		{
 			"name": name,
 			"email": email,
 			"body": body,
@@ -125,22 +232,126 @@ router.post('/addcomment', function(req, res, next) {
 
 		var posts = db.get('posts');
 
-		posts.update({
+		posts.update(
+		{
 			"_id": postid
-		},{
-			$push:{
+		},
+		{
+			$push:
+			{
 				"comments": comment
 			}
-		}, function(err, doc){
-			if(err){
+		}, function(err, doc)
+		   {
+				 if(err)
+				 {
+					 throw err;
+				 }
+			 	else
+				{
+					req.app.locals.postid = "";
+					req.flash('success', 'Comment Added');
+					res.location('/posts/show/'+postid);
+					res.redirect('/posts/show/'+postid);
+				}
+			});
+	}
+});
+
+
+
+router.post('/editpost', upload.single('mainimage'), function(req, res, next)
+{
+  // Get Form Values
+	var title = req.body.title;
+  var body = req.body.body;
+	var category = req.body.category;
+  var postid = req.app.locals.postid;
+	var mainimage;
+
+  	// Form Validation
+	req.checkBody('category','Name field is required').notEmpty();
+	req.checkBody('body', 'Body field is required').notEmpty();
+	req.checkBody('title', 'Title field is required').notEmpty();
+
+
+	if(req.file)
+	{
+		mainimage = req.file.filename;
+	}
+	else
+	{
+		mainimage = req.app.locals.mainimage;
+	}
+
+	// Check Errors
+	var errors = req.validationErrors();
+
+	if(errors)
+	{
+
+		var posts = db.get('posts');
+		var categories = db.get('categories');
+
+		categories.find({},{},function(err, categories)
+		{
+			if(err)
+			{
 				throw err;
-			} else {
-				req.flash('success', 'Comment Added');
+			}
+
+			posts.find({'_id': db.id(req.app.locals.postid)}, {},function(err, posts)
+			{
+				if(err)
+				{
+					throw err;
+				}
+
+				res.render('editpost',
+				{
+						'posts': posts,
+						'categories': categories,
+						'user': req.app.locals.loggedInUser
+				});
+			});
+		});
+	}
+  else
+	{
+
+		var posts = db.get('posts');
+
+		posts.update(
+		{
+			"_id": postid
+		},
+		{
+			$set:
+			{
+				"title" : title,
+				"body" : body,
+				"category" : category,
+				"mainimage": mainimage
+			}
+		}, function(err, doc)
+		{
+			if(err)
+			{
+				throw err;
+			}
+			else
+			{
+				req.app.locals.postid = "";
+				req.app.locals.mainimage = "";
+				req.flash('success', 'Post Edited');
 				res.location('/posts/show/'+postid);
 				res.redirect('/posts/show/'+postid);
 			}
 		});
 	}
 });
+
+
+
 
 module.exports = router;

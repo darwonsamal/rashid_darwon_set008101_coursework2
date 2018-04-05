@@ -1,10 +1,9 @@
 extends layout
 
-block content
 
+block content
   if !posts 
-   h3 There are no posts yet!
-   
+   h3 There are no posts yet!   
   if posts
    each post, i in posts
     .post
@@ -12,8 +11,8 @@ block content
       a(href='/posts/show/#{post._id}')
        =post.title
      p.meta Posted in 
-      a(href='/categories/show/#{post.category}') #{post.category} 
-      by #{post.author} 
+      a(href='/categories/show/#{post.category}') #{post.category}
+      by  by #{post.username} 
       on #{moment(post.date).format("MM-DD-YYYY")}
      img(src='/images/#{post.mainimage}')
      !=truncateText(post.body,400)
