@@ -23,6 +23,8 @@ var users = require('./routes/users');
 var posts = require('./routes/posts');
 var categories = require('./routes/categories')
 
+
+var usersCollection = dbMonk.get('users');
 var app = express();
 
 app.locals.moment = require('moment');
@@ -68,8 +70,17 @@ app.use(expressValidator({
       msg   : msg,
       value : value
     };
+  },
+  customValidators: {
+     myCustomFunc: function(value)
+     {
+       return false;
+     }
   }
 }));
+
+
+
 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

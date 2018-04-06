@@ -9,13 +9,16 @@ var db = mongoose.connection;
 var UserSchema = mongoose.Schema({
 	username: {
 		type: String,
-		index: true
+		index: true,
+		unique: true
 	},
 	password: {
 		type: String
 	},
 	email: {
-		type: String
+		type: String,
+		required: true,
+		unique: true
 	},
 	name: {
 		type: String
@@ -62,7 +65,7 @@ module.exports.updateUserPassword = function(user, callback)
 		bcrypt.hash(user.password, salt, function(err, hash)
 		{
 			user.password = hash;
-			user.save(callback);
+
 		});
 	});
 }

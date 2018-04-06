@@ -3,19 +3,24 @@ var router = express.Router();
 var mongo = require('mongodb');
 var db = require('monk')('localhost/nodeauth');
 
-router.get('/show/:category', function(req, res, next) {
+router.get('/show/:category', function(req, res, next)
+{
 	var posts = db.get('posts');
 
-	posts.find({category: req.params.category},{},function(err, post){
-		res.render('index',{
+	posts.find({category: req.params.category},{},function(err, post)
+	{
+		res.render('index',
+		{
   			title : req.params.category,
   			post: post
-  		});
+  	});
 	});
 });
 
-router.get('/add', function(req, res, next) {
-	res.render('addcategory',{
+router.get('/add', function(req, res, next)
+{
+	res.render('addcategory',
+	{
   		'title': 'Add Category'
 	});
 });

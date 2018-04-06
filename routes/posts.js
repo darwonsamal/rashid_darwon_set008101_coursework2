@@ -100,8 +100,6 @@ router.get('/deletepost/:id', function(req, res, next)
 	posts.remove({_id: db.id(req.params.id)});
 	res.location('/posts/myposts');
 	res.redirect('/posts/myposts');
-
-
 });
 
 router.post('/add', upload.single('mainimage'), function(req, res, next)
@@ -343,9 +341,10 @@ router.post('/editpost', upload.single('mainimage'), function(req, res, next)
 			{
 				req.app.locals.postid = "";
 				req.app.locals.mainimage = "";
+				postid = "";
 				req.flash('success', 'Post Edited');
-				res.location('/posts/show/'+postid);
-				res.redirect('/posts/show/'+postid);
+				res.location('/posts/myposts/');
+				res.redirect('/posts/myposts/');
 			}
 		});
 	}

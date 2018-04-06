@@ -5,20 +5,29 @@ var db = require('monk')('localhost/nodeauth');
 
 
 /* GET home page. */
-router.get('/', ensureAuthenticated, function(req, res, next) {
+router.get('/', ensureAuthenticated, function(req, res, next)
+{
   var db = req.db;
   var posts = db.get('posts');
 
-	posts.find({}, {}, function(err, posts){
+	posts.find({}, {}, function(err, posts)
+  {
+
   res.render('index', { posts: posts, title: "Home"});
+
   });
 });
 
-function ensureAuthenticated(req, res, next){
-	if(req.isAuthenticated()){
+function ensureAuthenticated(req, res, next)
+{
+  
+	if(req.isAuthenticated())
+  {
 		return next();
 	}
+
 	res.redirect('/users/login');
+
 }
 
 module.exports = router;

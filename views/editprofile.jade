@@ -12,10 +12,10 @@ block content
     form(method='post', action='/users/edituser', enctype="multipart/form-data")
       .form-group
         label Full Name:
-        input.form-control(name='name', type='text', value='#{user.name}')
+        input.form-control(name='name', type='text')
       .form-group
         label Email:
-        input.form-control(name='email', type='email', value='#{user.email}') 
+        input.form-control(name='email', type='email') 
       .form-group
         label Profile Image:
         input.form-control(name='mainimage', type='file', value = '#{user.profileimage}')  
