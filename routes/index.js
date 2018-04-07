@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb');
-var db = require('monk')('localhost/nodeauth');
+var db = require('monk')('localhost/blogmachine');
 
 
 /* GET home page. */
@@ -20,7 +20,7 @@ router.get('/', ensureAuthenticated, function(req, res, next)
 
 function ensureAuthenticated(req, res, next)
 {
-  
+
 	if(req.isAuthenticated())
   {
 		return next();

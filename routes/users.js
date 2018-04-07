@@ -5,7 +5,7 @@ var upload = multer({dest: './public/images'});
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mongo = require('mongodb');
-var db = require('monk')('localhost/nodeauth');
+var db = require('monk')('localhost/blogmachine');
 var fs = require('fs');
 var bcrypt = require('bcryptjs');
 const _ = require("lodash");
@@ -17,24 +17,8 @@ var User = require('../models/user');
 var loggedInUser;
 var userID;
 
-var checkUsername = false;
-var checkEmail = false;
-
 var users   = db.get('users');
 
-
-
-
-function checkUsername()
-{
-  checkUsername = true;
-}
-
-
-function checkEmail()
-{
-  checkEmail = true;
-}
 
 /* GET users listing. */
 router.get('/', function(req, res, next)
@@ -81,6 +65,7 @@ router.get('/edituser/:id', function(req, res, next)
     req.app.locals.profileimage = users[0].profileimage;
 
     userID = users[0]._id;
+    req.app.locals.loggedInUser = users[0];
 
     res.render('editprofile',
     {
@@ -114,6 +99,7 @@ router.get('/deleteuser/:id',  function(req, res, next)
   var posts = db.get('posts');
 	posts.remove({username: loggedInUser.username});
   users.remove({_id: req.params.id});
+  req.logout();
   req.flash('success', 'Your profile has been deleted');
   res.location('/users/login');
   res.redirect('/users/login');
@@ -134,10 +120,12 @@ router.post('/edituser', upload.single('mainimage') , function(req, res, next)
 
   if(errors)
   {
+    console.log("ERROR");
+    console.log(req.app.locals.loggedInUser);
   	res.render('editprofile',
     {
   		errors: errors,
-      users: req.app.locals.loggedInUser
+      user: req.app.locals.loggedInUser
   	});
   }
   else
@@ -209,7 +197,7 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
     	res.render('editpassword',
       {
     		errors: errors,
-        users: req.app.locals.loggedInUser
+        user: req.app.locals.loggedInUser
     	});
     }
     else
@@ -303,11 +291,14 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
     var password2 = req.body.password2;
 
 
-    if(req.file){
-      console.log('Uploading File...');
+    if(req.file)
+    {
+
       var profileimage = req.file.filename;
-    } else {
-      console.log('No File Uploaded...');
+    }
+    else
+    {
+
       var profileimage = 'noimage.jpg';
     }
 
@@ -321,39 +312,16 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
     req.checkBody('confirmpassword','Passwords do not match').equals(req.body.password);
 
 
-    req.checkBody('username').custom(value => {
-      return new Promise((resolve, reject) => {
-        users.findOne({username: req.body.username}, function(err, users)
-        {
 
-          console.log("entered");
-          if(err)
-          {
-            reject(new Error('Error'));
-          }
-          if(users[0] != null)
-          {
-            console.log("username already exists");
-            reject(new Error('Username Already Exists'));
-          }
-          resolve(true);
-        });
-      });
-    });
-
-    var errors = req.validationErrors();
-
-    /*
-    if(users[0] !== null)
+    if(Boolean(users))
     {
       console.log("username exists");
       req.checkBody('username').myCustomFunc(username).withMessage('Username is already taken');
     }
-    */
-
-
 
     // Check Errors
+
+    var errors = req.validationErrors();
 
 
     if(errors)

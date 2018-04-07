@@ -16,7 +16,7 @@ var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var db = mongoose.connection;
 
-var dbMonk = require('monk')('localhost/nodeauth');
+var dbMonk = require('monk')('localhost/blogmachine');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -29,7 +29,8 @@ var app = express();
 
 app.locals.moment = require('moment');
 
-app.locals.truncateText = function(text, length){
+app.locals.truncateText = function(text, length)
+{
   var truncatedText = text.substring(0, length);
   return truncatedText;
 }
@@ -45,7 +46,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Handle Sessions
-app.use(session({
+app.use(session(
+{
   secret:'secret',
   saveUninitialized: true,
   resave: true

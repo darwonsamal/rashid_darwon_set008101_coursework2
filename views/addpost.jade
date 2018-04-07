@@ -16,10 +16,10 @@ block content
 				each category, i in categories
 					option(value='#{category.name}') #{category.name}
 		.form-group
-			label Body
+			label Body:
 			textarea.form-control(name='body', id='body')
 		.form-group
-			label Main Image:
+			label Image:
 			input.form-control(name='mainimage', type='file')
 		.form-group
 		input.btn.btn-default(name='submit',type='submit',value='Save')

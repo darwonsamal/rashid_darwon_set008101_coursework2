@@ -3,7 +3,7 @@ var router = express.Router();
 var multer = require('multer');
 var upload = multer({ dest: './public/images' });
 var mongo = require('mongodb');
-var db = require('monk')('localhost/nodeauth');
+var db = require('monk')('localhost/blogmachine');
 
 
 router.get('/show/:id', function(req, res, next)
@@ -179,12 +179,12 @@ router.post('/add', upload.single('mainimage'), function(req, res, next)
 
 router.post('/addcomment', function(req, res, next) {
 	// Get Form Values
-	var title = req.body.title;
+	var name = req.body.name;
 	var body = req.body.body;
-	var username = req.app.locals.username;
+	var commentdate = new Date();
 
 		// Form Validation
-	req.checkBody('title','Title field is required').notEmpty();
+	req.checkBody('name','Title field is required').notEmpty();
 	req.checkBody('body', 'Body field is required').notEmpty();
 
 	// Check Errors
@@ -192,7 +192,7 @@ router.post('/addcomment', function(req, res, next) {
 
 	if(errors)
 	{
-
+		console.log("error");
 		var posts = db.get('posts');
 		var categories = db.get('categories');
 		categories.find({},{},function(err, categories)
@@ -209,8 +209,9 @@ router.post('/addcomment', function(req, res, next) {
 					throw err;
 				}
 
-				res.render('editpost',
+				res.render('show',
 				{
+					  'errors': errors,
 						'posts': posts,
 						'categories': categories,
 						'user': req.app.locals.loggedInUser
@@ -223,7 +224,6 @@ router.post('/addcomment', function(req, res, next) {
 		var comment =
 		{
 			"name": name,
-			"email": email,
 			"body": body,
 			"commentdate": commentdate
 		}
@@ -232,7 +232,7 @@ router.post('/addcomment', function(req, res, next) {
 
 		posts.update(
 		{
-			"_id": postid
+			"_id": req.app.locals.postid
 		},
 		{
 			$push:
@@ -247,10 +247,12 @@ router.post('/addcomment', function(req, res, next) {
 				 }
 			 	else
 				{
-					req.app.locals.postid = "";
+					console.log("wtf");
+
 					req.flash('success', 'Comment Added');
-					res.location('/posts/show/'+postid);
-					res.redirect('/posts/show/'+postid);
+					res.location('/posts/show/'+req.app.locals.postid);
+					res.redirect('/posts/show/'+req.app.locals.postid);
+					req.app.locals.postid = "";
 				}
 			});
 	}

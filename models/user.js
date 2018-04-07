@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var bcrypt = require('bcryptjs');
 
-mongoose.connect('mongodb://localhost/nodeauth');
+mongoose.connect('mongodb://localhost/blogmachine');
 
 var db = mongoose.connection;
 
@@ -9,7 +9,6 @@ var db = mongoose.connection;
 var UserSchema = mongoose.Schema({
 	username: {
 		type: String,
-		index: true,
 		unique: true
 	},
 	password: {
@@ -17,8 +16,8 @@ var UserSchema = mongoose.Schema({
 	},
 	email: {
 		type: String,
-		required: true,
-		unique: true
+		required: true
+
 	},
 	name: {
 		type: String

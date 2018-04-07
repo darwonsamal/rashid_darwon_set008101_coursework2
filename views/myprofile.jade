@@ -5,11 +5,17 @@ block content
   if users
    .gridContainer
     .img
+     if users.mainimage == "noimage.jpg"
+     else
+      h3 Your Profile Picture
       img(src='/images/#{users.profileimage}')
     .user
+      br
+      br
       h3 Your Name: #{users.name}
       h3 Your Email: #{users.email}
       h3 Your Username: #{users.username}
+      br
       br
       a(href='/users/edituser/#{users._id}')
        input.btn.btn-primary(type='button', name= 'editprofile', value= 'Edit Profile')

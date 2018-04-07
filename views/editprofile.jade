@@ -7,17 +7,15 @@ block content
     if errors
       each error, i in errors
         li.alert.alert-danger #{error.msg}
-  if users
-   each user, i in users
-    form(method='post', action='/users/edituser', enctype="multipart/form-data")
-      .form-group
-        label Full Name:
-        input.form-control(name='name', type='text')
-      .form-group
-        label Email:
-        input.form-control(name='email', type='email') 
-      .form-group
-        label Profile Image:
-        input.form-control(name='mainimage', type='file', value = '#{user.profileimage}')  
-      input.btn.btn-default(name = 'submit',type = 'submit', value = 'Save')
+  form(method='post', action='/users/edituser', enctype="multipart/form-data")
+   .form-group
+    label Full Name:
+    input.form-control(name='name', type='text', placeholder = 'Enter New Name')
+   .form-group
+    label Email:
+    input.form-control(name='email', type='email', placeholder = 'Enter New Email') 
+   .form-group
+    label Profile Image:
+    input.form-control(name='mainimage', type='file')  
+   input.btn.btn-default(name = 'submit',type = 'submit', value = 'Save')
     

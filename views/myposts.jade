@@ -3,7 +3,7 @@ extends layout
 block content
   if !posts 
    h3 You have no posts yet!
-  if posts
+  else
    each post, i in posts
     .post
      h1
@@ -12,9 +12,14 @@ block content
      p.meta Posted in 
       a(href='/categories/show/#{post.category}') #{post.category} 
       on #{moment(post.date).format("MM-DD-YYYY")}
-     img(src='/images/#{post.mainimage}')
+     if post.mainimage == "noimage.jpg"
+     else
+      img(src='/images/#{post.mainimage}')
+      br    
      !=truncateText(post.body,400)
      a.more(href='/posts/show/#{post._id}') Read More
+     br
+     br
      br
      a(href='/posts/editpost/#{post._id}')
       input.btn.btn-primary(type='button', name= 'editpost', value= 'Edit Post')
