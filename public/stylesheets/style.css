@@ -138,7 +138,15 @@ select{
 	height:28px;
 }
 
+.login
+{
+  align-items: center;
+  margin-left: 32%;
+}
 
+.login-input input {
+  width: 50%;
+}
 
 ul.success li{
 	padding: 15px;

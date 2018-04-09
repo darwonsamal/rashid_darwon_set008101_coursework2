@@ -18,6 +18,6 @@ block content
      else
       img(src='/images/#{post.mainimage}')
       br    
-     !=truncateText(post.body,400)
+     !=shortenText(post.body,500)
      a.more(href='/posts/show/#{post._id}') Read More
      

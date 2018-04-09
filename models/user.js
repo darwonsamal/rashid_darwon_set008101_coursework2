@@ -29,18 +29,22 @@ var UserSchema = mongoose.Schema({
 
 var User = module.exports = mongoose.model('User', UserSchema);
 
-module.exports.getUserById = function(id, callback){
+module.exports.getUserById = function(id, callback)
+{
 	User.findById(id, callback);
 }
 
-module.exports.getUserByUsername = function(username, callback){
-	var query = {username: username};
-	User.findOne(query, callback);
+module.exports.getUserByUsername = function(username, callback)
+{
+
+	User.findOne({username: username}, callback);
 }
 
 
-module.exports.comparePassword = function(candidatePassword, hash, callback){
-	bcrypt.compare(candidatePassword, hash, function(err, isMatch) {
+module.exports.comparePassword = function(password, hash, callback)
+{
+	bcrypt.compare(password, hash, function(err, isMatch)
+	 {
     	callback(null, isMatch);
 	});
 }

@@ -29,7 +29,7 @@ router.get('/', function(req, res, next)
 router.get('/myprofile/:id', function(req, res, next)
 {
 
-  users.find({_id: db.id(req.params.id)}, {}, function(err, users)
+  users.find({_id: db.id(req.app.locals.loggedInUser._id)}, {}, function(err, users)
   {
     if(err)
 		{
@@ -37,7 +37,7 @@ router.get('/myprofile/:id', function(req, res, next)
 		}
     req.app.locals.loggedInUser = users[0];
 
-    res.render('myprofile', {users : req.app.locals.loggedInUser});
+    res.render('myprofile', {users : req.app.locals.loggedInUser, title: 'My Profile'});
   });
 
 });
@@ -69,7 +69,7 @@ router.get('/edituser/:id', function(req, res, next)
 
     res.render('editprofile',
     {
-      'users': users
+      'user': users
     });
   });
 });
@@ -248,30 +248,48 @@ function(req, res)
     res.redirect('/');
 });
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function(user, done)
+{
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.getUserById(id, function(err, user) {
+passport.deserializeUser(function(id, done)
+{
+  User.getUserById(id, function(err, user)
+  {
     done(err, user);
   });
 });
 
-passport.use(new LocalStrategy(function(username, password, done){
-  User.getUserByUsername(username, function(err, user){
-    if(err) throw err;
-    if(!user){
-      return done(null, false, {message: 'Unknown User'});
+passport.use(new LocalStrategy(function(username, password, done)
+{
+  User.getUserByUsername(username, function(err, user)
+  {
+    if(err)
+    {
+      throw err;
     }
 
-    User.comparePassword(password, user.password, function(err, isMatch){
-      if(err) return done(err);
-      if(isMatch){
+    if(!user)
+    {
+      return done(null, false, {message: 'User is unknown'});
+    }
+
+    User.comparePassword(password, user.password, function(err, isMatch)
+    {
+      if(err)
+      {
+        return done(err);
+      }
+
+      if(isMatch)
+      {
 
         loggedInUser = user;
         return done(null, user);
-      } else {
+      }
+      else
+      {
         return done(null, false, {message:'Invalid Password'});
       }
     });

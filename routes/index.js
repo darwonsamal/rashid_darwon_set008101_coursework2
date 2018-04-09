@@ -7,7 +7,7 @@ var db = require('monk')('localhost/blogmachine');
 /* GET home page. */
 router.get('/', ensureAuthenticated, function(req, res, next)
 {
-  var db = req.db;
+  
   var posts = db.get('posts');
 
 	posts.find({}, {}, function(err, posts)
