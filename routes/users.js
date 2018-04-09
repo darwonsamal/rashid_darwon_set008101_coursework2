@@ -10,8 +10,6 @@ var fs = require('fs');
 var bcrypt = require('bcryptjs');
 const _ = require("lodash");
 
-
-
 var User = require('../models/user');
 
 var loggedInUser;
@@ -20,41 +18,49 @@ var userID;
 var users   = db.get('users');
 
 
-/* GET users listing. */
+// GET METHOD
+
+// get users
 router.get('/', function(req, res, next)
 {
   res.send('respond with a resource');
 });
 
+// responsible for rendering my profile page
 router.get('/myprofile/:id', function(req, res, next)
 {
 
   users.find({_id: db.id(req.app.locals.loggedInUser._id)}, {}, function(err, users)
   {
+
     if(err)
 		{
 			throw err;
 		}
+
     req.app.locals.loggedInUser = users[0];
 
     res.render('myprofile', {users : req.app.locals.loggedInUser, title: 'My Profile'});
   });
-
 });
 
+// responsible for rendering the register page
 router.get('/register', function(req, res, next)
 {
   res.render('register',{title:'Register'});
 });
 
+// responsible for rendering login page
 router.get('/login', function(req, res, next)
 {
   res.render('login', {title:'Login'});
 });
 
+// responsible for rendering the edit page
 router.get('/edituser/:id', function(req, res, next)
 {
 
+  // FIND user just in case.
   users.find({'_id': db.id(req.params.id)}, {}, function(err, users)
   {
     if(err)
@@ -74,6 +80,7 @@ router.get('/edituser/:id', function(req, res, next)
   });
 });
 
+// responsible for rendering editpassword page
 router.get('/updatepassword/:id', function(req, res, next)
 {
 
@@ -94,11 +101,16 @@ router.get('/updatepassword/:id', function(req, res, next)
   });
 });
 
+// responsible for deleting users profile and its posts
 router.get('/deleteuser/:id',  function(req, res, next)
 {
   var posts = db.get('posts');
+  //remove all posts
 	posts.remove({username: loggedInUser.username});
+  //remove user
   users.remove({_id: req.params.id});
+
+  // logout
   req.logout();
   req.flash('success', 'Your profile has been deleted');
   res.location('/users/login');
@@ -106,6 +118,19 @@ router.get('/deleteuser/:id',  function(req, res, next)
 });
 
 
+// responsible for logging user out of website
+router.get('/logout', function(req, res)
+{
+  req.logout();
+  userID = "";
+
+  req.flash('success', 'You are now logged out');
+  res.redirect('/users/login');
+});
+
+// POST METHODS
+
+//responsible for updating users profile
 router.post('/edituser', upload.single('mainimage') , function(req, res, next)
 {
 
@@ -117,17 +142,17 @@ router.post('/edituser', upload.single('mainimage') , function(req, res, next)
   // Check Errors
   var errors = req.validationErrors();
 
-
+  // if error render page again with errors
   if(errors)
   {
-    console.log("ERROR");
-    console.log(req.app.locals.loggedInUser);
+
   	res.render('editprofile',
     {
   		errors: errors,
       user: req.app.locals.loggedInUser
   	});
   }
+  //success update profile
   else
   {
     var name = req.body.name;
@@ -142,9 +167,11 @@ router.post('/edituser', upload.single('mainimage') , function(req, res, next)
     }
     else
     {
+      // if user wants original photo
       profileimage = req.app.locals.profileimage;
     }
 
+    //update user
     users.update(
     {
       "_id": userID
@@ -168,16 +195,17 @@ router.post('/edituser', upload.single('mainimage') , function(req, res, next)
           req.flash('success', 'Your profile has been updated');
           res.location('/users/myprofile/' + userID);
           res.redirect('/users/myprofile/' + userID);
+
           req.app.locals.profileimage = "";
           userID = "";
-          console.log(userID);
+
       }
     });
 
   }
 });
 
-
+// responsible for updating password
 router.post('/updatepassword',  upload.single('mainimage'), function(req, res, next)
 {
 
@@ -191,7 +219,7 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
     // Check Errors
     var errors = req.validationErrors();
 
-
+    // if error, render page again with errors
     if(errors)
     {
     	res.render('editpassword',
@@ -202,8 +230,10 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
     }
     else
     {
+      // hash new password so its secure
       var password = bcrypt.hashSync(req.body.password);
 
+      // update user
       users.update(
       {
         "_id": userID
@@ -227,6 +257,7 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
             req.flash('success', 'Your password has been updated');
             res.location('/users/myprofile/' + userID);
             res.redirect('/users/myprofile/' + userID);
+
             userID = "";
 
         }
@@ -237,33 +268,40 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
 
 
 
-
+// responsible for logging in. Uses passport to authenticate log-in
 router.post('/login', passport.authenticate('local',{failureRedirect:'/users/login', failureFlash: 'Invalid username or password'}),
 function(req, res)
 {
     var posts = db.get('posts');
     req.app.locals.username = req.body.username;
     req.app.locals.loggedInUser = loggedInUser;
-    
+
     req.flash('success', 'You are now logged in');
     res.redirect('/');
 });
 
+// SETTING UP PASSPORT TO BE USED FOR USER LOG-IN AUTHENTICATION
+
+// serialze user
 passport.serializeUser(function(user, done)
 {
   done(null, user.id);
 });
 
+// deserializ user
 passport.deserializeUser(function(id, done)
 {
+  // get user
   User.getUserById(id, function(err, user)
   {
     done(err, user);
   });
 });
 
+// SET UP LOCAL STRATEGY
 passport.use(new LocalStrategy(function(username, password, done)
 {
+  // get user by its username
   User.getUserByUsername(username, function(err, user)
   {
     if(err)
@@ -271,11 +309,13 @@ passport.use(new LocalStrategy(function(username, password, done)
       throw err;
     }
 
+    // if no exists be like
     if(!user)
     {
       return done(null, false, {message: 'User is unknown'});
     }
 
+    // check if password is correct
     User.comparePassword(password, user.password, function(err, isMatch)
     {
       if(err)
@@ -283,6 +323,7 @@ passport.use(new LocalStrategy(function(username, password, done)
         return done(err);
       }
 
+      // if passwords match return user and authenticate
       if(isMatch)
       {
 
@@ -297,9 +338,10 @@ passport.use(new LocalStrategy(function(username, password, done)
   });
 }));
 
-
+// responsible for creating a new user profile
 router.post('/register', upload.single('profileimage') ,function(req, res, next)
 {
+  // check to see if username already exists
   users.findOne({username: req.body.username}, function(err, users)
   {
 
@@ -331,10 +373,10 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
     req.checkBody('confirmpassword','Passwords do not match').equals(req.body.password);
 
 
-
+    // check to see if username exists
     if(Boolean(users))
     {
-      console.log("username exists");
+      // if so, raise an error
       req.checkBody('username').myCustomFunc(username).withMessage('Username is already taken');
     }
 
@@ -342,7 +384,7 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
 
     var errors = req.validationErrors();
 
-
+    // if error, render screen again with errors
     if(errors)
     {
       res.render('register',
@@ -350,8 +392,10 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
         errors: errors
       });
     }
+    // SUCCESS
     else
     {
+      // make new user
       var newUser = new User({
         name: name,
         email: email,
@@ -360,8 +404,8 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
         profileimage: profileimage
       });
 
-      console.log(newUser);
 
+      // add user
       User.createUser(newUser, function(err, user){
         if(err) throw err;
       });
@@ -376,12 +420,5 @@ router.post('/register', upload.single('profileimage') ,function(req, res, next)
 
 });
 
-router.get('/logout', function(req, res){
-  req.logout();
-  userID = "";
-
-  req.flash('success', 'You are now logged out');
-  res.redirect('/users/login');
-});
 
 module.exports = router;

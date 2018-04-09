@@ -6,6 +6,10 @@ var mongo = require('mongodb');
 var db = require('monk')('localhost/blogmachine');
 
 
+// GET METHODS
+
+
+// responsible for rendering the show page for a post
 router.get('/show/:id', function(req, res, next)
 {
 	var posts = db.get('posts');
@@ -27,6 +31,7 @@ router.get('/show/:id', function(req, res, next)
 	});
 });
 
+// responsible for rendering the add post page
 router.get('/add', function(req, res, next)
 {
 	var categories = db.get('categories');
@@ -46,11 +51,13 @@ router.get('/add', function(req, res, next)
 	});
 });
 
+// responsible for rendering the my posts page.
 router.get('/myposts', function(req, res, next)
 {
 
 	var posts = db.get('posts');
 
+	// find posts that belong to the user who is logged in
 	posts.find({username: req.app.locals.username}, {}, function(err, posts)
 	{
 		if(err)
@@ -63,12 +70,14 @@ router.get('/myposts', function(req, res, next)
 	});
 });
 
+// responsible for rendering the edit post page
 router.get('/editpost/:id', function(req, res, next)
 {
 
 	var posts = db.get('posts');
 	var categories = db.get('categories');
 
+	// get categories
 	categories.find({},{},function(err, categories)
 	{
 		if(err)
@@ -76,14 +85,17 @@ router.get('/editpost/:id', function(req, res, next)
 			throw err;
 		}
 
+		// get specific post
 		posts.find({'_id': db.id(req.params.id)},{}, function(err, posts)
 		{
 			if(err)
 			{
 				throw err;
 			}
+
 			req.app.locals.mainimage = posts[0].mainimage;
 			req.app.locals.postid = req.params.id;
+
 			res.render('editpost',
 			{
 	  			'posts': posts,
@@ -94,14 +106,20 @@ router.get('/editpost/:id', function(req, res, next)
 
 });
 
+// responsible for deleting a post
 router.get('/deletepost/:id', function(req, res, next)
 {
 	var posts = db.get('posts');
+
 	posts.remove({_id: db.id(req.params.id)});
+
 	res.location('/posts/myposts');
 	res.redirect('/posts/myposts');
 });
 
+// POST METHODS
+
+// responsible for adding a new post for a user.
 router.post('/add', upload.single('mainimage'), function(req, res, next)
 {
   // Get Form Values
@@ -128,6 +146,7 @@ router.post('/add', upload.single('mainimage'), function(req, res, next)
 	// Check Errors
 	var errors = req.validationErrors();
 
+	// if error render the screen again
 	if(errors)
 	{
 
@@ -149,7 +168,9 @@ router.post('/add', upload.single('mainimage'), function(req, res, next)
 
 	else
 	{
+
 		var posts = db.get('posts');
+		// insert new post
 		posts.insert(
 	  {
 
@@ -177,29 +198,26 @@ router.post('/add', upload.single('mainimage'), function(req, res, next)
 	}
 });
 
-router.post('/addcomment', function(req, res, next) {
-	// Get Form Values
+// responsible for adding a comment to a post
+router.post('/addcomment', function(req, res, next)
+{
 
-	//console.log(req.body.loggedInUser);
-	//console.log(req.body.loggedInUser.username);
+	// Get Form Values
 	var name = req.app.locals.username;
 	var body = req.body.body;
 	var commentdate = new Date();
-
-
 
 	req.checkBody('body', 'Body field is required').notEmpty();
 
 	// Check Errors
 	var errors = req.validationErrors();
 
+	// if error render page again with errors
 	if(errors)
 	{
-		console.log("error");
-		var posts = db.get('posts');
-		var categories = db.get('categories');
-		categories.find({},{},function(err, categories)
-		{
+
+			var posts = db.get('posts');
+
 			if(err)
 			{
 				throw err;
@@ -216,12 +234,11 @@ router.post('/addcomment', function(req, res, next) {
 				{
 					  'errors': errors,
 						'posts': posts,
-						'categories': categories,
 						'user': req.app.locals.loggedInUser
 				});
 			});
-		});
 	}
+	// else it is all good
 	else
 	{
 		var comment =
@@ -233,6 +250,7 @@ router.post('/addcomment', function(req, res, next) {
 
 		var posts = db.get('posts');
 
+		// add comment to post
 		posts.update(
 		{
 			"_id": req.app.locals.postid
@@ -260,8 +278,7 @@ router.post('/addcomment', function(req, res, next) {
 	}
 });
 
-
-
+// responsible for editing post
 router.post('/editpost', upload.single('mainimage'), function(req, res, next)
 {
   // Get Form Values
@@ -283,12 +300,14 @@ router.post('/editpost', upload.single('mainimage'), function(req, res, next)
 	}
 	else
 	{
+		// save original image
 		mainimage = req.app.locals.mainimage;
 	}
 
 	// Check Errors
 	var errors = req.validationErrors();
 
+	// if error render screen again with errors
 	if(errors)
 	{
 
@@ -312,12 +331,14 @@ router.post('/editpost', upload.single('mainimage'), function(req, res, next)
 				res.render('editpost',
 				{
 						'posts': posts,
+						'errors': errors,
 						'categories': categories,
 						'user': req.app.locals.loggedInUser
 				});
 			});
 		});
 	}
+	// succes update post
   else
 	{
 
@@ -346,6 +367,7 @@ router.post('/editpost', upload.single('mainimage'), function(req, res, next)
 				req.app.locals.postid = "";
 				req.app.locals.mainimage = "";
 				postid = "";
+				
 				req.flash('success', 'Post Edited');
 				res.location('/posts/myposts/');
 				res.redirect('/posts/myposts/');
