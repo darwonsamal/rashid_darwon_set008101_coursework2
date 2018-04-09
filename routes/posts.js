@@ -179,12 +179,15 @@ router.post('/add', upload.single('mainimage'), function(req, res, next)
 
 router.post('/addcomment', function(req, res, next) {
 	// Get Form Values
-	var name = req.body.name;
+
+	//console.log(req.body.loggedInUser);
+	//console.log(req.body.loggedInUser.username);
+	var name = req.app.locals.username;
 	var body = req.body.body;
 	var commentdate = new Date();
 
-		// Form Validation
-	req.checkBody('name','Title field is required').notEmpty();
+
+
 	req.checkBody('body', 'Body field is required').notEmpty();
 
 	// Check Errors
@@ -247,7 +250,6 @@ router.post('/addcomment', function(req, res, next) {
 				 }
 			 	else
 				{
-					console.log("wtf");
 
 					req.flash('success', 'Comment Added');
 					res.location('/posts/show/'+req.app.locals.postid);

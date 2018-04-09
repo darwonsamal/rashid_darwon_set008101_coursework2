@@ -228,7 +228,7 @@ router.post('/updatepassword',  upload.single('mainimage'), function(req, res, n
             res.location('/users/myprofile/' + userID);
             res.redirect('/users/myprofile/' + userID);
             userID = "";
-            console.log(password);
+
         }
       });
 
@@ -244,6 +244,7 @@ function(req, res)
     var posts = db.get('posts');
     req.app.locals.username = req.body.username;
     req.app.locals.loggedInUser = loggedInUser;
+    
     req.flash('success', 'You are now logged in');
     res.redirect('/');
 });
